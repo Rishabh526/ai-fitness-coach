@@ -1,41 +1,37 @@
 import { useState } from "react";
-import { loginUser } from "./services/authServices";
+import { loginUser } from "../services/authServices";
+import { useAuth } from "../context/useAuth";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-    const [credentials, setCredentials] = useState({
-        username: "",
-        password: "",
-    });
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
 
-    const [message, setMessage] = useState("");
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
 
-    const handleChange = (e) => {
-        setCredentials({...credentials, [e.target.name]: e.target.value});
-    };
+  const handleSubmit = async () => {
+    const data = await loginUser(credentials);
 
-    const handleSubmit = async () => {
-        const data = await loginUser(credentials);
+    if (data.access) {
+      login(data.access, data.refresh);
+        navigate("/dashboard")
+    }
+  };
 
-        if(data.access) {
-            localStorage.setItem("access", data.access);
-            localStorage.setItem("refresh", data.refresh);
-            setMessage("Login successful");
-        }else {
-        setMessage(JSON.stringify(data));
-        }
-    };
-
-    return (
-        <div>
-
-            <input name="username" placeholder="Username" onChange={handleChange}/>
-            <input type="password" name="password" placeholder="Password" onChange={handleChange}/>
-
-            <button onClick={handleSubmit}>Login</button>
-            <p>{message}</p>
-        </div>
-    )
+  return (
+    <div>
+      <input name="username" onChange={handleChange} />
+      <input type="password" name="password" onChange={handleChange} />
+      <button onClick={handleSubmit}>Login</button>
+    </div>
+  );
 }
 
 export default Login;
