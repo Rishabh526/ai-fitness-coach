@@ -35,3 +35,17 @@ export async function getMyProfile() {
 }
 
 
+export async function updateProfile(data){
+  const res = await apiFetch("/api/profile/me/update/", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  })
+
+  if(!res.ok){
+    const err = await res.json()
+    throw new Error(err.detail || "Profile update failed")
+  }
+
+  return res.json()
+}
+

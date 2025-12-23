@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Profile
-from .serializers import ProfileSerializer
+from .serializers import ProfileSerializer, ProfileUpdateSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -55,4 +55,17 @@ def get_my_profile_detail(request):
     return Response(serializer.data)
 
 
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def update_my_profile(request):
+    profile = Profile.objects.get(user=request.user)
 
+    serializer = ProfileUpdateSerializer(
+        profile,
+        data=request.data,
+        partial=True
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
