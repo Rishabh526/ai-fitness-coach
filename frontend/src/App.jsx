@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import Protected from './components/Protected'
 import DashboardPage from './pages/DashboardPage'
+import OnboardingPage from './pages/OnboardingPage'
 
 
 function App() {
@@ -17,6 +18,14 @@ function App() {
       <Protected>
         <DashboardPage/>
       </Protected>}/>
+    <Route 
+      path="/onboarding"
+      element={
+        <Protected>
+          <OnboardingPage/>
+        </Protected>
+      }
+    />
    </Routes>
   )
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { loginUser } from "../services/authServices";
 import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
+import {  checkProfileExists } from "../services/profileServices"
 
 function Login() {
   const { login } = useAuth();
@@ -21,7 +22,9 @@ function Login() {
 
     if (data.access) {
       login(data.access, data.refresh);
-        navigate("/dashboard")
+      const exists = await checkProfileExists()
+      if(exists) navigate("/dashboard");
+      else navigate("/onboarding")
     }
   };
 
