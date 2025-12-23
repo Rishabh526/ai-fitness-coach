@@ -17,8 +17,18 @@ export async function createProfile(data) {
   });
 
   if (!res.ok) {
-    const errorData = await res.json(); // ✅ await first
+    const errorData = await res.json(); 
     throw new Error(errorData.detail || "Profile creation failed");
+  }
+
+  return res.json();
+}
+
+export async function getMyProfile() {
+  const res = await apiFetch("/api/profile/me/detail/")
+
+  if(!res.ok) {
+    throw new Error("Failed to fetch profile")
   }
 
   return res.json();

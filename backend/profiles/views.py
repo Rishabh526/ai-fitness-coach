@@ -46,3 +46,13 @@ def create_profile(request):
         status=status.HTTP_201_CREATED
     )
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_my_profile_detail(request):
+    profile = Profile.objects.get(user=request.user)
+    serializer = ProfileSerializer(profile)
+    return Response(serializer.data)
+
+
+
