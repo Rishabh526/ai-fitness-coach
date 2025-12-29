@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/useAuth";
 import { getMyProfile, updateProfile } from "../services/profileServices";
 
+import Navbar from "../components/dashboard/Navbar";
+import Sidebar from "../components/dashboard/Sidebar";
+import DashboardLayout from "../components/dashboard/DashboardLayout";
+import ProfileCard from "../components/dashboard/ProfileCard";
+import EditProfilePanel from "../components/dashboard/EditProfilePanel";
+import ChatSection from "../components/dashboard/ChatSection";
+
 function DashboardPage() {
   const { logout } = useAuth();
 
@@ -16,7 +23,7 @@ function DashboardPage() {
       try {
         const data = await getMyProfile();
         setProfile(data);
-        setForm(data); // ✅ use fetched data
+        setForm(data);
       } catch (err) {
         setError("Could not load profile");
         console.error(err);
@@ -28,77 +35,53 @@ function DashboardPage() {
     fetchProfile();
   }, []);
 
+  const handleSaveProfile = async () => {
+    try {
+      const updated = await updateProfile({
+        weight_kg: Number(form.weight_kg),
+        goal: form.goal,
+      });
+
+      setProfile(updated);
+      setForm(updated);
+      setEditing(false);
+    } catch (err) {
+      alert("Update failed");
+      console.error(err);
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <>
+      <Navbar username="User" onLogout={logout} />
 
-      {/* Profile Display */}
-      <div>
-        <h2>Your Profile</h2>
-        <p><strong>Age:</strong> {profile.age}</p>
-        <p><strong>Height:</strong> {profile.height_cm} cm</p>
-        <p><strong>Weight:</strong> {profile.weight_kg} kg</p>
-        <p><strong>Sex:</strong> {profile.sex}</p>
-        <p><strong>Goal:</strong> {profile.goal}</p>
-        <p><strong>Activity Level:</strong> {profile.activity_level}</p>
-      </div>
-
-      {/* Edit Mode */}
-      {editing && form ? (
-        <div>
-          <h2>Edit Profile</h2>
-
-          <input
-            type="number"
-            value={form.weight_kg}
-            onChange={(e) =>
-              setForm({ ...form, weight_kg: e.target.value })
-            }
+      <DashboardLayout
+        sidebar={
+          <Sidebar
+            onEditProfile={() => setEditing(true)}
+            onEditWorkout={() => console.log("Edit workout (later)")}
+            onEditMacros={() => console.log("Edit macros (later)")}
+            onRegeneratePlan={() => console.log("Regenerate AI plan (later)")}
           />
+        }
+      >
+        <ProfileCard profile={profile} />
 
-          <select
-            value={form.goal}
-            onChange={(e) =>
-              setForm({ ...form, goal: e.target.value })
-            }
-          >
-            <option value="BULKING">Bulking</option>
-            <option value="CUTTING">Cutting</option>
-            <option value="MAINTAINING">Maintaining</option>
-          </select>
+        {editing && form && (
+          <EditProfilePanel
+            form={form}
+            setForm={setForm}
+            onSave={handleSaveProfile}
+            onCancel={() => setEditing(false)}
+          />
+        )}
 
-          <button
-            onClick={async () => {
-              try {
-                const updated = await updateProfile({
-                  weight_kg: Number(form.weight_kg),
-                  goal: form.goal,
-                });
-
-                setProfile(updated); // ✅ sync UI with backend
-                setForm(updated);
-                setEditing(false);
-              } catch (err) {
-                alert("Update failed");
-                console.log(err)
-              }
-            }}
-          >
-            Save
-          </button>
-
-          <button onClick={() => setEditing(false)}>Cancel</button>
-        </div>
-      ) : (
-        <button onClick={() => setEditing(true)}>Edit Profile</button>
-      )}
-
-      <br />
-      <button onClick={logout}>Logout</button>
-    </div>
+        <ChatSection />
+      </DashboardLayout>
+    </>
   );
 }
 
