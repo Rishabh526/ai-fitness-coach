@@ -8,6 +8,8 @@ import DashboardLayout from "../components/dashboard/DashboardLayout";
 import ProfileCard from "../components/dashboard/ProfileCard";
 import EditProfilePanel from "../components/dashboard/EditProfilePanel";
 import ChatSection from "../components/dashboard/ChatSection";
+import WorkoutPlanCard from "../components/dashboard/WorkoutPlanCard";
+import MacrosCard from "../components/dashboard/MacrosCard";
 
 function DashboardPage() {
   const { logout } = useAuth();
@@ -17,6 +19,22 @@ function DashboardPage() {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const workoutPlan = {
+    split: "Push / Pull / Legs",
+    frequency: "6 days a week",
+    focus: "Hypertrophy",
+    summary:
+      "Push: Chest, shoulders, triceps. Pull: Back, biceps. Legs: Quads, hamstrings, glutes",
+  };
+
+  const macros = {
+    calories: 2000,
+    protein: 150,
+    carbs: 220,
+    fats: 55,
+    goal: profile?.goal,
+  };
 
   useEffect(() => {
     async function fetchProfile() {
@@ -69,6 +87,12 @@ function DashboardPage() {
         }
       >
         <ProfileCard profile={profile} />
+
+        {/* Workout + Macros Cards */}
+        <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
+          <WorkoutPlanCard workoutPlan={workoutPlan} />
+          <MacrosCard macros={macros} />
+        </div>
 
         {editing && form && (
           <EditProfilePanel
