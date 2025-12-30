@@ -20,21 +20,74 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const workoutPlan = {
-    split: "Push / Pull / Legs",
-    frequency: "6 days a week",
-    focus: "Hypertrophy",
-    summary:
-      "Push: Chest, shoulders, triceps. Pull: Back, biceps. Legs: Quads, hamstrings, glutes",
-  };
+  function calculateMacros(profile) {
+    // very basic BMR + TDEE mock logic (intentionally simple)
+    const bmr =
+      profile.sex === "MALE"
+        ? 10 * profile.weight_kg +
+          6.25 * profile.height_cm -
+          5 * profile.age +
+          5
+        : 10 * profile.weight_kg +
+          6.25 * profile.height_cm -
+          5 * profile.age -
+          161;
 
-  const macros = {
-    calories: 2000,
-    protein: 150,
-    carbs: 220,
-    fats: 55,
-    goal: profile?.goal,
-  };
+    const activityMultiplier = {
+      SEDENTARY: 1.2,
+      MODERATE: 1.55,
+      ACTIVE: 1.75,
+    }[profile.activity_level];
+
+    let calories = Math.round(bmr * activityMultiplier);
+
+    if (profile.goal === "CUTTING") calories -= 400;
+    if (profile.goal === "BULKING") calories += 300;
+
+    const protein = Math.round(profile.weight_kg * 2);
+    const fats = Math.round((calories * 0.25) / 9);
+    const carbs = Math.round((calories - protein * 4 - fats * 9) / 4);
+
+    return { calories, protein, carbs, fats };
+  }
+
+  function generateWorkoutPlan(profile) {
+    if (profile.goal === "CUTTING") {
+      return {
+        split: "Upper / Lower",
+        frequency: "4–5 days per week",
+        focus: "Fat loss + muscle retention",
+        summary:
+          "Upper: compound lifts with moderate volume. Lower: strength-focused legs. Includes cardio.",
+      };
+    }
+
+    if (profile.goal === "BULKING") {
+      return {
+        split: "Push / Pull / Legs",
+        frequency: "6 days per week",
+        focus: "Hypertrophy",
+        summary:
+          "High-volume hypertrophy training with emphasis on progressive overload.",
+      };
+    }
+
+    return {
+      split: "Full Body",
+      frequency: "3–4 days per week",
+      focus: "Maintenance",
+      summary: "Balanced full-body training to maintain muscle and strength.",
+    };
+  }
+
+  const workoutPlan = profile ? generateWorkoutPlan(profile) : null;
+
+  const macros = profile
+    ? {
+        ...calculateMacros(profile),
+        goal: profile.goal,
+      }
+    : null;
 
   useEffect(() => {
     async function fetchProfile() {
@@ -90,8 +143,12 @@ function DashboardPage() {
 
         {/* Workout + Macros Cards */}
         <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
-          <WorkoutPlanCard workoutPlan={workoutPlan} />
-          <MacrosCard macros={macros} />
+          {workoutPlan && macros && (
+            <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
+              <WorkoutPlanCard workoutPlan={workoutPlan} />
+              <MacrosCard macros={macros} />
+            </div>
+          )}
         </div>
 
         {editing && form && (
