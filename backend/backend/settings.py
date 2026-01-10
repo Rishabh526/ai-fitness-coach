@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts',
     'corsheaders',
     'profiles',
+    'ai_plans',
 ]
 
 REST_FRAMEWORK = {
