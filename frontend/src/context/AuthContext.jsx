@@ -1,31 +1,64 @@
-import { createContext, useState} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-const AuthContext = createContext(null)
+const AuthContext = createContext(null);
 
-export function AuthProvider({children}){
-    const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        return Boolean(localStorage.getItem("access"))
-    })
+export function AuthProvider({ children }) {
+  const [accessToken, setAccessToken] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // ✅ Restore tokens on page load
+  useEffect(() => {
+    const storedAccess = localStorage.getItem("access");
+    const storedRefresh = localStorage.getItem("refresh");
 
-
-    const login = (access, refresh) => {
-        localStorage.setItem("access", access);
-        localStorage.setItem("refresh", refresh);
-        setIsAuthenticated(true);
+    if (storedAccess && storedRefresh) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAccessToken(storedAccess);
+      setRefreshToken(storedRefresh);
+      setIsAuthenticated(true);
     }
+  }, []);
 
-    const logout = () => {
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
-        setIsAuthenticated(false);
-    }
+  // ✅ Login handler
+  const login = (access, refresh) => {
+    localStorage.setItem("access", access);
+    localStorage.setItem("refresh", refresh);
 
-    return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    )
+    setAccessToken(access);
+    setRefreshToken(refresh);
+    setIsAuthenticated(true);
+  };
+
+  // ✅ Logout handler
+  const logout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+
+    setAccessToken(null);
+    setRefreshToken(null);
+    setIsAuthenticated(false);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        accessToken,
+        refreshToken,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export default AuthContext;
+// ✅ Custom hook (important)
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+export default AuthContext
