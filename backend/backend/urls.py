@@ -29,5 +29,6 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/profile/', include('profiles.urls')),
-    path("api/ai/", include("ai_plans.urls"))
+    path("api/ai/", include("ai_plans.urls")),
+    path("api/workout/", include("workout_preference.urls")),
 ]

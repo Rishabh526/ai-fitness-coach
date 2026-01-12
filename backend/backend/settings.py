@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'profiles',
     'ai_plans',
+    'workout_preference',
 ]
 
 REST_FRAMEWORK = {
